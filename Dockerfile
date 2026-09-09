@@ -3,8 +3,6 @@
 FROM node:22-bookworm-slim
 
 ARG DEBIAN_FRONTEND=noninteractive
-ARG AGENT_UID=1000
-ARG AGENT_GID=1000
 
 ENV LANG=C.UTF-8 \
     LC_ALL=C.UTF-8 \
@@ -99,15 +97,21 @@ RUN playwright-cli install-browser --with-deps \
 
 # -------------------------------------------------------------------
 # Agent user
+#
+# node:22-bookworm-slim enthält bereits:
+#   user: node
+#   UID:  1000
+#   GID:  1000
+#
+# Wir benennen diesen Benutzer einfach in "agent" um.
 # -------------------------------------------------------------------
 
-RUN groupadd --gid "${AGENT_GID}" agent \
-    && useradd \
-        --uid "${AGENT_UID}" \
-        --gid "${AGENT_GID}" \
-        --create-home \
-        --shell /bin/bash \
-        agent \
+RUN groupmod -n agent node \
+    && usermod \
+        -l agent \
+        -d /home/agent \
+        -m \
+        node \
     && passwd -d agent \
     && mkdir -p \
         /workspace \
