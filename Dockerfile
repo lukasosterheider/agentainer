@@ -69,17 +69,25 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 # -------------------------------------------------------------------
-# Node package managers + AI agents
+# Package manager
 # -------------------------------------------------------------------
 
-RUN npm install -g \
-    pnpm@latest \
-    yarn@latest \
-    @openai/codex@latest \
-    @anthropic-ai/claude-code@latest \
-    @google/gemini-cli@latest \
-    @playwright/cli@latest \
+RUN npm install -g pnpm@latest \
     && npm cache clean --force
+
+# -------------------------------------------------------------------
+# AI Agents
+# -------------------------------------------------------------------
+
+RUN npm install -g @openai/codex@latest
+
+RUN npm install -g @anthropic-ai/claude-code@latest
+
+RUN npm install -g @google/gemini-cli@latest
+
+RUN npm install -g @playwright/cli@latest
+
+RUN npm cache clean --force
 
 # -------------------------------------------------------------------
 # Chromium + Linux browser dependencies
