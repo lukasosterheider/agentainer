@@ -1,0 +1,66 @@
+services:
+
+  agent:
+    build:
+      context: .
+      dockerfile: Dockerfile
+
+    hostname: ${AGENT_HOSTNAME:-ai-agent-01}
+
+    restart: unless-stopped
+
+    shm_size: "2gb"
+
+    environment:
+      SSH_AUTHORIZED_KEYS: ${SSH_AUTHORIZED_KEYS:?}
+
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+
+    volumes:
+      - agent-home:/home/agent
+      - agent-workspace:/workspace
+      - ssh-host-keys:/var/lib/agent-ssh
+
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - "ss -lnt | grep -q ':22 '"
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+
+
+  netbird:
+    image: netbirdio/netbird:latest
+
+    restart: unless-stopped
+
+    network_mode: "service:agent"
+
+    depends_on:
+      agent:
+        condition: service_started
+
+    cap_add:
+      - NET_ADMIN
+      - SYS_ADMIN
+      - SYS_RESOURCE
+
+    devices:
+      - /dev/net/tun:/dev/net/tun
+
+    environment:
+      NB_SETUP_KEY: ${NB_SETUP_KEY:?}
+
+    volumes:
+      - netbird-data:/var/lib/netbird
+
+
+volumes:
+  agent-home:
+  agent-workspace:
+  ssh-host-keys:
+  netbird-data:
