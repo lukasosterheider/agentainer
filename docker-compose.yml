@@ -14,11 +14,16 @@ services:
     environment:
       SSH_AUTHORIZED_KEYS: ${SSH_AUTHORIZED_KEYS:?}
 
+      # The entrypoint links this image directory into the persistent home.
+      AGENT_SKILLS_DIR: /opt/agent/skills
+
       OPENAI_API_KEY: ${OPENAI_API_KEY:-}
       ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
       GEMINI_API_KEY: ${GEMINI_API_KEY:-}
 
     volumes:
+      # Keep home/workspace data. Do not mount over /opt/agent/skills:
+      # it must always come from the current image, including skills/agents.md.
       - agent-home:/home/agent
       - agent-workspace:/workspace
       - ssh-host-keys:/var/lib/agent-ssh
