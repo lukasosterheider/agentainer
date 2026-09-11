@@ -35,14 +35,14 @@ class SkillLinksTest(unittest.TestCase):
     def test_fresh_home_and_repeated_start(self):
         self.run_links()
         for tool in (".agents", ".claude"):
-            for name in ("playwright-cli", "example-workspace-overview"):
+            for name in ("playwright-cli", "unslop"):
                 link = self.home / tool / "skills" / name
                 self.assertTrue(link.is_symlink())
                 self.assertEqual(link.resolve(), self.skills / name)
         for relative in (".codex/AGENTS.md", ".claude/CLAUDE.md", ".gemini/GEMINI.md"):
             link = self.home / relative
             self.assertTrue(link.is_symlink())
-            self.assertEqual(link.read_text(), (self.skills / "agents.md").read_text())
+            self.assertEqual(link.read_text(), (self.skills / "AGENTS.md").read_text())
         self.assertEqual(self.run_links().stdout, "")
         self.assertFalse((self.home / ".local/state/agent/skill-backups").exists())
 
@@ -76,9 +76,9 @@ class SkillLinksTest(unittest.TestCase):
     def test_new_image_changes_additions_and_removals(self):
         self.run_links()
         self.add_skill("playwright-cli", "Playwright version 2")
-        (self.skills / "agents.md").write_text("New image instructions")
+        (self.skills / "AGENTS.md").write_text("New image instructions")
         self.add_skill("new-skill", "New skill")
-        shutil.rmtree(self.skills / "example-workspace-overview")
+        shutil.rmtree(self.skills / "unslop")
         personal_link = self.home / ".agents/skills/personal"
         personal_link.symlink_to(self.root / "unavailable-personal-skill")
         self.run_links()
@@ -86,7 +86,7 @@ class SkillLinksTest(unittest.TestCase):
             base = self.home / tool / "skills"
             self.assertEqual((base / "playwright-cli/SKILL.md").read_text(), "Playwright version 2")
             self.assertEqual((base / "new-skill/SKILL.md").read_text(), "New skill")
-            self.assertFalse((base / "example-workspace-overview").is_symlink())
+            self.assertFalse((base / "unslop").is_symlink())
         self.assertEqual((self.home / ".codex/AGENTS.md").read_text(), "New image instructions")
         self.assertTrue(personal_link.is_symlink())
 
@@ -103,8 +103,27 @@ class SkillLinksTest(unittest.TestCase):
         self.assertTrue(backups[0].is_symlink())
         self.assertEqual(backups[0].resolve(), original)
 
+    def test_previous_image_links_are_migrated(self):
+        instruction_paths = (".codex/AGENTS.md", ".claude/CLAUDE.md", ".gemini/GEMINI.md")
+        for relative in instruction_paths:
+            link = self.home / relative
+            link.parent.mkdir(parents=True, exist_ok=True)
+            link.symlink_to(self.skills / "agents.md")
+        for tool in (".agents", ".claude"):
+            old_skill = self.home / tool / "skills/example-workspace-overview"
+            old_skill.parent.mkdir(parents=True, exist_ok=True)
+            old_skill.symlink_to(self.skills / "example-workspace-overview")
+        self.run_links()
+        for relative in instruction_paths:
+            self.assertEqual((self.home / relative).resolve(), self.skills / "AGENTS.md")
+        for tool in (".agents", ".claude"):
+            base = self.home / tool / "skills"
+            self.assertFalse((base / "example-workspace-overview").is_symlink())
+            self.assertEqual((base / "unslop").resolve(), self.skills / "unslop")
+        self.assertEqual(self.run_links().stdout, "")
+
     def test_incomplete_image_fails_before_modifying_home(self):
-        (self.skills / "agents.md").unlink()
+        (self.skills / "AGENTS.md").unlink()
         result = self.run_links(check=False)
         self.assertNotEqual(result.returncode, 0)
         self.assertIn("Missing image-provided", result.stderr)

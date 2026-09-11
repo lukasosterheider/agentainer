@@ -23,7 +23,7 @@ services:
 
     volumes:
       # Keep home/workspace data. Do not mount over /opt/agent/skills:
-      # it must always come from the current image, including skills/agents.md.
+      # it must always come from the current image, including skills/AGENTS.md.
       - agent-home:/home/agent
       - agent-workspace:/workspace
       - ssh-host-keys:/var/lib/agent-ssh

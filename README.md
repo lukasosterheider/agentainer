@@ -65,8 +65,8 @@ Dockerfile
 docker-compose.yml
 README.md
 scripts/agent-link-skills.sh
-skills/agents.md
-skills/example-workspace-overview/SKILL.md
+skills/AGENTS.md
+skills/unslop/SKILL.md
 ```
 
 Start the runtime with:
@@ -150,9 +150,10 @@ directory under `/opt/agent/skills`:
 
 ```text
 /opt/agent/skills/
-├── agents.md
-├── example-workspace-overview/
-│   └── SKILL.md
+├── AGENTS.md
+├── unslop/
+│   ├── SKILL.md
+│   └── LICENSE
 └── playwright-cli/
     ├── SKILL.md
     └── references/
@@ -164,17 +165,22 @@ The Playwright files are supplied by the CLI installed in the same image.
 The name `playwright-cli` is reserved; put additional skills in their own
 directories under `skills/`.
 
-The shared `skills/agents.md` is linked using the filenames each CLI reads:
+The `unslop` skill removes AI writing patterns. Its `SKILL.md` is copied unchanged
+from [cursor/plugins](https://github.com/cursor/plugins/blob/f5bdd6826fd0a0d9cbc4347134c3a74a200b9d9d/pstack/skills/unslop/SKILL.md),
+including the upstream `disable-model-invocation: true` setting. Its MIT license
+is included in `skills/unslop/LICENSE`.
+
+The shared `skills/AGENTS.md` is linked using the filenames each CLI reads:
 
 | Tool | Home path | Image source |
 | --- | --- | --- |
-| Codex | `~/.codex/AGENTS.md` | `/opt/agent/skills/agents.md` |
-| Claude Code | `~/.claude/CLAUDE.md` | `/opt/agent/skills/agents.md` |
-| Gemini CLI | `~/.gemini/GEMINI.md` | `/opt/agent/skills/agents.md` |
+| Codex | `~/.codex/AGENTS.md` | `/opt/agent/skills/AGENTS.md` |
+| Claude Code | `~/.claude/CLAUDE.md` | `/opt/agent/skills/AGENTS.md` |
+| Gemini CLI | `~/.gemini/GEMINI.md` | `/opt/agent/skills/AGENTS.md` |
 
 These are the CLIs' default home locations; custom configuration-home overrides
-are not configured by this image. The source filename is lowercase `agents.md`;
-the links use the required uppercase names. See the official documentation for
+are not configured by this image. The source filename is uppercase `AGENTS.md`.
+See the official documentation for
 [Codex instructions](https://learn.chatgpt.com/docs/agent-configuration/agents-md),
 [Claude instructions](https://code.claude.com/docs/en/memory), and
 [Gemini instructions](https://geminicli.com/docs/cli/gemini-md/).
@@ -205,8 +211,8 @@ A plain restart does not adopt a newly built image. Existing home and workspace
 volumes, including project files and logins, are retained.
 
 For changes only to `skills/`, a cached `docker compose build agent` is sufficient
-before recreating the containers. Try the example skill by asking an agent for
-an overview of the projects in `/workspace`.
+before recreating the containers. Invoke `unslop` to edit text for AI writing
+patterns.
 
 Run the link migration and update checks locally with:
 

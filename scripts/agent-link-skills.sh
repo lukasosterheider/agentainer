@@ -6,8 +6,8 @@ skills_dir=${AGENT_SKILLS_DIR:-/opt/agent/skills}
 skills_dir=${skills_dir%/}
 backup_dir=
 
-if [[ ! -f "$skills_dir/agents.md" || ! -f "$skills_dir/playwright-cli/SKILL.md" ]]; then
-    echo "ERROR: Missing image-provided skills or agents.md in $skills_dir" >&2
+if [[ ! -f "$skills_dir/AGENTS.md" || ! -f "$skills_dir/playwright-cli/SKILL.md" ]]; then
+    echo "ERROR: Missing image-provided skills or AGENTS.md in $skills_dir" >&2
     exit 1
 fi
 
@@ -49,6 +49,6 @@ for relative_dir in .agents/skills .claude/skills; do
     done
 done
 
-link_file "$skills_dir/agents.md" "$agent_home/.codex/AGENTS.md"
-link_file "$skills_dir/agents.md" "$agent_home/.claude/CLAUDE.md"
-link_file "$skills_dir/agents.md" "$agent_home/.gemini/GEMINI.md"
+link_file "$skills_dir/AGENTS.md" "$agent_home/.codex/AGENTS.md"
+link_file "$skills_dir/AGENTS.md" "$agent_home/.claude/CLAUDE.md"
+link_file "$skills_dir/AGENTS.md" "$agent_home/.gemini/GEMINI.md"
