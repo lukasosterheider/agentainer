@@ -7,6 +7,7 @@ Included:
 * OpenAI Codex CLI
 * Anthropic Claude Code
 * Google Gemini CLI
+* T3 Code (web GUI for coding agents)
 * Playwright + Chromium
 * SSH access
 * NetBird for private remote networking
@@ -100,8 +101,23 @@ Inside the container, the AI tools are available directly:
 codex
 claude
 gemini
+t3 --help
 playwright-cli
 ```
+
+## T3 Code
+
+[T3 Code](https://github.com/pingdotgg/t3code) is installed globally as `t3`, using the latest npm release at image build time, like the other agent tools.
+
+After connecting over SSH, authenticate a supported provider such as Codex (`codex login`) or Claude Code (`claude auth login`). Then start T3 Code from your project directory:
+
+```bash
+t3 serve --host 0.0.0.0 --port 3773
+```
+
+Open `http://<NETBIRD-IP>:3773` in your browser and use the pairing details printed in the terminal. No additional Docker port mapping is needed. Run the command inside `tmux` if it should keep running after you disconnect from SSH.
+
+T3 Code stores its state under the agent user's home directory, which is persisted by the existing `agent-home` volume.
 
 ## Accessing Web Applications
 

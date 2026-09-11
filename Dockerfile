@@ -83,6 +83,8 @@ RUN npm install -g @anthropic-ai/claude-code@latest
 
 RUN npm install -g @google/gemini-cli@latest
 
+RUN npm install -g t3@latest
+
 RUN npm install -g @playwright/cli@latest
 
 RUN npm cache clean --force
@@ -224,6 +226,7 @@ RUN node --version \
     && codex --version \
     && claude --version \
     && gemini --version \
+    && t3 --version \
     && playwright-cli --version
 
 WORKDIR /workspace
