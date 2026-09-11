@@ -153,16 +153,23 @@ HostKey /var/lib/agent-ssh/ssh_host_ed25519_key
 EOF
 
 # -------------------------------------------------------------------
-# Playwright skills
+# Image-provided skills and shared agent instructions
 # -------------------------------------------------------------------
 
-USER agent
-WORKDIR /workspace
+COPY skills/ /opt/agent/skills/
+COPY --chmod=755 scripts/agent-link-skills.sh /usr/local/bin/agent-link-skills
 
-RUN playwright-cli install --skills -g \
-    && playwright-cli install --skills=agents -g
+# Use the CLI's installer to obtain the matching skill, then keep its
+# files outside the persistent home volume. Reserve this name for Playwright.
+RUN playwright-cli install --skills=agents -g \
+    && test ! -e /opt/agent/skills/playwright-cli \
+    && mv /root/.agents/skills/playwright-cli /opt/agent/skills/playwright-cli \
+    && rmdir /root/.agents/skills /root/.agents \
+    && test -f /opt/agent/skills/playwright-cli/SKILL.md \
+    && chmod -R a+rX /opt/agent/skills
 
-USER root
+# Seed links for fresh home volumes; the entrypoint also handles existing ones.
+RUN runuser -u agent -- /usr/local/bin/agent-link-skills
 
 # -------------------------------------------------------------------
 # Entrypoint
@@ -185,6 +192,9 @@ if [[ -z "${SSH_AUTHORIZED_KEYS:-}" ]]; then
     echo "ERROR: SSH_AUTHORIZED_KEYS is not set."
     exit 1
 fi
+
+# Volumes are mounted now, so existing homes also receive the image links.
+runuser -u agent -- /usr/local/bin/agent-link-skills
 
 printf '%s\n' "${SSH_AUTHORIZED_KEYS}" \
     > /home/agent/.ssh/authorized_keys
